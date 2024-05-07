@@ -3,8 +3,10 @@ package Controller;
 import Model.Tache;
 import Model.TacheDAO;
 import View.ListeTache;
+import View.NotificationsVue;
 import View.TacheModifierVue;
 import View.TacheVue;
+
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -167,5 +169,16 @@ public class TacheControleur implements ActionListener {
         }
 
         return taches;
+    }
+    public void afficherNotifications() {
+        List<Tache> taches = tacheDAO.listerTaches();
+        List<String> notifications = NotificationManager.obtenirNotifications(taches);
+
+        if (!notifications.isEmpty()) {
+            NotificationsVue notificationsVue = new NotificationsVue(notifications);
+            notificationsVue.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(listeTacheVue, "Aucune notification à afficher.", "Notifications", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package View;
 
+import Controller.TacheControleur;
 import Model.Tache;
 import Model.TacheDAO;
 
@@ -8,6 +9,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,21 +23,49 @@ public class ListeTache extends JFrame {
     private JButton boutonTrierParDate;
     private JButton boutonTrierParPriorite;
     private JTextField champRecherche;
+    private JButton boutonNotifications;
     private DefaultTableModel modeleTableTaches;
+    private TacheControleur tacheControleur;
 
     public ListeTache() {
         initComponents();
     }
 
     private void initComponents() {
+        // Configuration de la fenêtre
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Liste des tâches");
+        setPreferredSize(new Dimension(800, 600));
+
         // Initialisation des composants graphiques
         champRecherche = new JTextField();
+        champRecherche.setPreferredSize(new Dimension(200, 30));
+        champRecherche.setFont(new Font("Arial", Font.PLAIN, 14));
+
         tableTaches = new JTable();
-        boutonCreer = new JButton("Créer");
-        boutonModifier = new JButton("Modifier");
-        boutonSupprimer = new JButton("Supprimer");
-        boutonTrierParDate = new JButton("Trier par date");
-        boutonTrierParPriorite = new JButton("Trier par priorité");
+        tableTaches.setFont(new Font("Arial", Font.PLAIN, 14));
+        tableTaches.setRowHeight(25);
+        tableTaches.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+
+        boutonCreer = new JButton("➕");
+        boutonCreer.setToolTipText("Créer une nouvelle tâche");
+
+        boutonModifier = new JButton("✏️");
+        boutonModifier.setToolTipText("Modifier la tâche sélectionnée");
+
+        boutonSupprimer = new JButton("🗑️");
+        boutonSupprimer.setToolTipText("Supprimer la tâche sélectionnée");
+
+        boutonTrierParDate = new JButton("📅");
+        boutonTrierParDate.setToolTipText("Trier les tâches par date");
+
+        boutonTrierParPriorite = new JButton("⭐");
+        boutonTrierParPriorite.setToolTipText("Trier les tâches par priorité");
+
+        boutonNotifications = new JButton("🔔");
+        boutonNotifications.setToolTipText("Notifications");
+
+        boutonNotifications.setToolTipText("Afficher les notifications");
 
         // Configuration de la table des tâches
         modeleTableTaches = new DefaultTableModel(
@@ -45,25 +76,38 @@ public class ListeTache extends JFrame {
 
         // Configuration de la disposition des composants
         setLayout(new BorderLayout());
+
         JPanel panelHaut = new JPanel(new BorderLayout());
-        panelHaut.add(new JLabel("Recherche :"), BorderLayout.WEST);
+        panelHaut.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelHaut.add(new JLabel("Recherche : "), BorderLayout.WEST);
         panelHaut.add(champRecherche, BorderLayout.CENTER);
         add(panelHaut, BorderLayout.NORTH);
-        add(new JScrollPane(tableTaches), BorderLayout.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(tableTaches);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(scrollPane, BorderLayout.CENTER);
+
         JPanel panelBas = new JPanel();
+        panelBas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelBas.add(boutonCreer);
         panelBas.add(boutonModifier);
         panelBas.add(boutonSupprimer);
         panelBas.add(boutonTrierParDate);
         panelBas.add(boutonTrierParPriorite);
+        panelBas.add(boutonNotifications);
         add(panelBas, BorderLayout.SOUTH);
 
-        // Configuration de la fenêtre
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("Liste des tâches");
         pack();
         setLocationRelativeTo(null);
+
+        boutonNotifications.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tacheControleur.afficherNotifications();
+            }
+        });
     }
+
     public void afficherTaches(List<Tache> taches) {
         modeleTableTaches.setRowCount(0);
         for (Tache tache : taches) {
@@ -101,6 +145,10 @@ public class ListeTache extends JFrame {
 
     public JButton getBoutonTrierParPriorite() {
         return boutonTrierParPriorite;
+    }
+
+    public JButton getBoutonNotifications() {
+        return boutonNotifications;
     }
 
     public JTextField getChampRecherche() {
@@ -144,5 +192,9 @@ public class ListeTache extends JFrame {
         }
 
         afficherTaches(tachesFiltrees);
+    }
+
+    public void setTacheControleur(TacheControleur tacheControleur) {
+        this.tacheControleur = tacheControleur;
     }
 }
