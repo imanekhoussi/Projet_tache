@@ -5,8 +5,6 @@ import Model.Tache;
 import Model.TacheDAO;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -20,8 +18,6 @@ public class ListeTache extends JFrame {
     private JButton boutonCreer;
     private JButton boutonModifier;
     private JButton boutonSupprimer;
-    private JButton boutonTrierParDate;
-    private JButton boutonTrierParPriorite;
     private JTextField champRecherche;
     private JButton boutonNotifications;
     private DefaultTableModel modeleTableTaches;
@@ -35,37 +31,36 @@ public class ListeTache extends JFrame {
         // Configuration de la fenêtre
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Liste des tâches");
-        setPreferredSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(1200, 800));
 
         // Initialisation des composants graphiques
         champRecherche = new JTextField();
-        champRecherche.setPreferredSize(new Dimension(200, 30));
-        champRecherche.setFont(new Font("Arial", Font.PLAIN, 14));
+        champRecherche.setPreferredSize(new Dimension(300, 40));
+        champRecherche.setFont(new Font("Arial", Font.PLAIN, 16));
 
         tableTaches = new JTable();
-        tableTaches.setFont(new Font("Arial", Font.PLAIN, 14));
-        tableTaches.setRowHeight(25);
-        tableTaches.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        tableTaches.setFont(new Font("Arial", Font.PLAIN, 16));
+        tableTaches.setRowHeight(30);
+        tableTaches.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+        tableTaches.getTableHeader().setPreferredSize(new Dimension(tableTaches.getWidth(), 40));
+        tableTaches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableTaches.setAutoCreateRowSorter(true);
 
-        boutonCreer = new JButton("➕");
-        boutonCreer.setToolTipText("Créer une nouvelle tâche");
+        boutonCreer = new JButton("Créer");
+        boutonCreer.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonCreer.setPreferredSize(new Dimension(120, 40));
 
-        boutonModifier = new JButton("✏️");
-        boutonModifier.setToolTipText("Modifier la tâche sélectionnée");
+        boutonModifier = new JButton("Modifier");
+        boutonModifier.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonModifier.setPreferredSize(new Dimension(120, 40));
 
-        boutonSupprimer = new JButton("🗑️");
-        boutonSupprimer.setToolTipText("Supprimer la tâche sélectionnée");
+        boutonSupprimer = new JButton("Supprimer");
+        boutonSupprimer.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonSupprimer.setPreferredSize(new Dimension(120, 40));
 
-        boutonTrierParDate = new JButton("📅");
-        boutonTrierParDate.setToolTipText("Trier les tâches par date");
-
-        boutonTrierParPriorite = new JButton("⭐");
-        boutonTrierParPriorite.setToolTipText("Trier les tâches par priorité");
-
-        boutonNotifications = new JButton("🔔");
-        boutonNotifications.setToolTipText("Notifications");
-
-        boutonNotifications.setToolTipText("Afficher les notifications");
+        boutonNotifications = new JButton("Notifications");
+        boutonNotifications.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonNotifications.setPreferredSize(new Dimension(150, 40));
 
         // Configuration de la table des tâches
         modeleTableTaches = new DefaultTableModel(
@@ -78,23 +73,29 @@ public class ListeTache extends JFrame {
         setLayout(new BorderLayout());
 
         JPanel panelHaut = new JPanel(new BorderLayout());
-        panelHaut.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelHaut.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panelHaut.add(new JLabel("Recherche : "), BorderLayout.WEST);
         panelHaut.add(champRecherche, BorderLayout.CENTER);
         add(panelHaut, BorderLayout.NORTH);
 
         JScrollPane scrollPane = new JScrollPane(tableTaches);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel panelBas = new JPanel();
-        panelBas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panelBas.add(boutonCreer);
-        panelBas.add(boutonModifier);
-        panelBas.add(boutonSupprimer);
-        panelBas.add(boutonTrierParDate);
-        panelBas.add(boutonTrierParPriorite);
-        panelBas.add(boutonNotifications);
+        panelBas.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panelBas.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 10, 0, 10);
+        panelBas.add(boutonCreer, gbc);
+        gbc.gridx++;
+        panelBas.add(boutonModifier, gbc);
+        gbc.gridx++;
+        panelBas.add(boutonSupprimer, gbc);
+        gbc.gridx++;
+        panelBas.add(boutonNotifications, gbc);
         add(panelBas, BorderLayout.SOUTH);
 
         pack();
@@ -137,14 +138,6 @@ public class ListeTache extends JFrame {
 
     public JButton getBoutonSupprimer() {
         return boutonSupprimer;
-    }
-
-    public JButton getBoutonTrierParDate() {
-        return boutonTrierParDate;
-    }
-
-    public JButton getBoutonTrierParPriorite() {
-        return boutonTrierParPriorite;
     }
 
     public JButton getBoutonNotifications() {
