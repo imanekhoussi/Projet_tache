@@ -1,3 +1,4 @@
+// Controller.TacheControleur.java
 package Controller;
 
 import Model.Tache;
@@ -71,37 +72,63 @@ public class TacheControleur implements ActionListener {
         });
     }
 
-    public void modifierTache(Tache tache) {
-        TacheModifierVue tacheModifierVue = new TacheModifierVue(tache);
-        tacheModifierVue.setVisible(true);
+    public void modifierTache(int tacheId) {
+        System.out.println("Entrée dans modifierTache"); // Débogage
 
-        tacheModifierVue.getBoutonConfirmer().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String titre = tacheModifierVue.getChampTitre().getText();
-                String description = tacheModifierVue.getChampDescription().getText();
-                String priorite = (String) tacheModifierVue.getComboBoxPriorite().getSelectedItem();
-                Date date = tacheModifierVue.getDatePicker().getDate();
-                String etat = (String) tacheModifierVue.getComboBoxEtat().getSelectedItem();
+        // Récupérer la tâche à modifier par son ID
+        Tache tacheAModifier = tacheDAO.getTacheById(tacheId);
 
-                tache.setTitre(titre);
-                tache.setDescription(description);
-                tache.setPriorite(priorite);
-                tache.setDate(date);
-                tache.setEtat(etat);
+        if (tacheAModifier != null) {
+            System.out.println("Valeurs initiales de la tâche : " + tacheAModifier); // Débogage
 
-                tacheDAO.modifierTache(tache);
-                mettreAJourListeTaches();
-                tacheModifierVue.dispose();
-            }
-        });
+            TacheModifierVue tacheModifierVue = new TacheModifierVue(tacheAModifier);
+            tacheModifierVue.setVisible(true);
+
+            tacheModifierVue.getBoutonConfirmer().addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("Bouton Confirmer cliqué"); // Débogage
+                    String titre = tacheModifierVue.getChampTitre().getText();
+                    String description = tacheModifierVue.getChampDescription().getText();
+                    String priorite = (String) tacheModifierVue.getComboBoxPriorite().getSelectedItem();
+                    Date date = tacheModifierVue.getDatePicker().getDate();
+                    String etat = (String) tacheModifierVue.getComboBoxEtat().getSelectedItem();
+
+                    System.out.println("Nouvelles valeurs de la tâche :"); // Débogage
+                    System.out.println("Titre : " + titre); // Débogage
+                    System.out.println("Description : " + description); // Débogage
+                    System.out.println("Priorité : " + priorite); // Débogage
+                    System.out.println("Date : " + date); // Débogage
+                    System.out.println("État : " + etat); // Débogage
+
+                    tacheAModifier.setTitre(titre);
+                    tacheAModifier.setDescription(description);
+                    tacheAModifier.setPriorite(priorite);
+                    tacheAModifier.setDate(date);
+                    tacheAModifier.setEtat(etat);
+
+                    System.out.println("Avant d'appeler modifierTache du DAO"); // Débogage
+                    tacheDAO.modifierTache(tacheAModifier);
+                    System.out.println("Après l'appel à modifierTache du DAO"); // Débogage
+                    mettreAJourListeTaches(); // Appel déplacé ici
+                    tacheModifierVue.dispose();
+                }
+            });
+        } else {
+            System.out.println("La tâche à modifier n'a pas été trouvée dans la base de données."); // Débogage
+        }
     }
-
     public void supprimerTache(Tache tache) {
+        System.out.println("Entrée dans supprimerTache"); // Débogage
         int confirmationSuppression = JOptionPane.showConfirmDialog(listeTacheVue, "Êtes-vous sûr de vouloir supprimer cette tâche ?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
         if (confirmationSuppression == JOptionPane.YES_OPTION) {
+            System.out.println("Suppression confirmée"); // Débogage
+            System.out.println("Avant d'appeler supprimerTache du DAO"); // Débogage
             tacheDAO.supprimerTache(tache.getId());
+            System.out.println("Après l'appel à supprimerTache du DAO"); // Débogage
             mettreAJourListeTaches();
+        } else {
+            System.out.println("Suppression annulée"); // Débogage
         }
     }
 
@@ -113,10 +140,8 @@ public class TacheControleur implements ActionListener {
 
     public void afficherNotifications() {
         List<Tache> taches = tacheDAO.listerTaches();
-        List<String> notifications = Controller.NotificationManager.obtenirNotifications(taches);
-
-        if (!notifications.isEmpty()) {
-            NotificationsVue notificationsVue = new NotificationsVue(notifications);
+        if (!taches.isEmpty()) {
+            NotificationsVue notificationsVue = new NotificationsVue(taches, tacheDAO);
             notificationsVue.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(listeTacheVue, "Aucune notification à afficher.", "Notifications", JOptionPane.INFORMATION_MESSAGE);

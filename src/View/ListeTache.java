@@ -1,3 +1,4 @@
+// View.ListeTache.java
 package View;
 
 import Controller.TacheControleur;
@@ -6,6 +7,7 @@ import Model.TacheDAO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,14 +18,14 @@ import java.util.List;
 public class ListeTache extends JFrame {
     private JTable tableTaches;
     private JButton boutonCreer;
-    private JButton boutonModifier;
-    private JButton boutonSupprimer;
     private JTextField champRecherche;
     private JButton boutonNotifications;
     private DefaultTableModel modeleTableTaches;
     private TacheControleur tacheControleur;
+    private TacheDAO tacheDAO;
 
-    public ListeTache() {
+    public ListeTache(TacheDAO tacheDAO) {
+        this.tacheDAO = tacheDAO;
         initComponents();
     }
 
@@ -45,18 +47,16 @@ public class ListeTache extends JFrame {
         tableTaches.getTableHeader().setPreferredSize(new Dimension(tableTaches.getWidth(), 40));
         tableTaches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tableTaches.setAutoCreateRowSorter(true);
+        tableTaches.setDragEnabled(true);
+        tableTaches.setDropMode(DropMode.INSERT_ROWS);
+        tableTaches.setTransferHandler(new TransferHandler() {
+            // Implémentation du glisser-déposer des lignes de la table
+            // ...
+        });
 
         boutonCreer = new JButton("Créer");
         boutonCreer.setFont(new Font("Arial", Font.PLAIN, 16));
         boutonCreer.setPreferredSize(new Dimension(120, 40));
-
-        boutonModifier = new JButton("Modifier");
-        boutonModifier.setFont(new Font("Arial", Font.PLAIN, 16));
-        boutonModifier.setPreferredSize(new Dimension(120, 40));
-
-        boutonSupprimer = new JButton("Supprimer");
-        boutonSupprimer.setFont(new Font("Arial", Font.PLAIN, 16));
-        boutonSupprimer.setPreferredSize(new Dimension(120, 40));
 
         boutonNotifications = new JButton("Notifications");
         boutonNotifications.setFont(new Font("Arial", Font.PLAIN, 16));
@@ -65,9 +65,21 @@ public class ListeTache extends JFrame {
         // Configuration de la table des tâches
         modeleTableTaches = new DefaultTableModel(
                 new Object[][]{},
-                new String[]{"ID", "Titre", "Description", "Priorité", "Date", "État"}
-        );
+                new String[]{"Titre", "Description", "Priorité", "Date", "État", "Modifier", "Supprimer"}
+        ) {
+            // Rendre les cellules "Modifier" et "Supprimer" cliquables
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 5 || column == 6;
+            }
+        };
         tableTaches.setModel(modeleTableTaches);
+
+        // Configuration des boutons "Modifier" et "Supprimer" dans chaque ligne
+        tableTaches.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
+        tableTaches.getColumnModel().getColumn(5).setCellEditor(new ButtonCellEditor(new JCheckBox()));
+        tableTaches.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
+        tableTaches.getColumnModel().getColumn(6).setCellEditor(new ButtonCellEditor(new JCheckBox()));
 
         // Configuration de la disposition des composants
         setLayout(new BorderLayout());
@@ -91,10 +103,6 @@ public class ListeTache extends JFrame {
         gbc.insets = new Insets(0, 10, 0, 10);
         panelBas.add(boutonCreer, gbc);
         gbc.gridx++;
-        panelBas.add(boutonModifier, gbc);
-        gbc.gridx++;
-        panelBas.add(boutonSupprimer, gbc);
-        gbc.gridx++;
         panelBas.add(boutonNotifications, gbc);
         add(panelBas, BorderLayout.SOUTH);
 
@@ -113,12 +121,13 @@ public class ListeTache extends JFrame {
         modeleTableTaches.setRowCount(0);
         for (Tache tache : taches) {
             Object[] rowData = {
-                    tache.getId(),
                     tache.getTitre(),
                     tache.getDescription(),
                     tache.getPriorite(),
                     tache.getDate(),
-                    tache.getEtat()
+                    tache.getEtat(),
+                    "Modifier",
+                    "Supprimer"
             };
             modeleTableTaches.addRow(rowData);
         }
@@ -132,14 +141,6 @@ public class ListeTache extends JFrame {
         return boutonCreer;
     }
 
-    public JButton getBoutonModifier() {
-        return boutonModifier;
-    }
-
-    public JButton getBoutonSupprimer() {
-        return boutonSupprimer;
-    }
-
     public JButton getBoutonNotifications() {
         return boutonNotifications;
     }
@@ -148,25 +149,19 @@ public class ListeTache extends JFrame {
         return champRecherche;
     }
 
-    private List<Tache> getTachesAffichees(JTable tableTaches) {
-        DefaultTableModel model = (DefaultTableModel) tableTaches.getModel();
-        List<Tache> taches = new ArrayList<>();
+    private Tache getTacheFromRow(int modelRow) {
+        String titre = (String) modeleTableTaches.getValueAt(modelRow, 0);
+        String description = (String) modeleTableTaches.getValueAt(modelRow, 1);
+        String priorite = (String) modeleTableTaches.getValueAt(modelRow, 2);
+        Date date = (Date) modeleTableTaches.getValueAt(modelRow, 3);
+        String etat = (String) modeleTableTaches.getValueAt(modelRow, 4);
+        Tache tache = new Tache(titre, description, priorite, date, etat);
 
-        int rowCount = model.getRowCount();
-        for (int i = 0; i < rowCount; i++) {
-            int id = (int) model.getValueAt(i, 0);
-            String titre = (String) model.getValueAt(i, 1);
-            String description = (String) model.getValueAt(i, 2);
-            String priorite = (String) model.getValueAt(i, 3);
-            Date date = (Date) model.getValueAt(i, 4);
-            String etat = (String) model.getValueAt(i, 5);
+        // Récupérer l'ID de la tâche depuis le DAO
+        int id = tacheDAO.getTacheId(titre, description, priorite, (java.sql.Date) date, etat);
+        tache.setId(id);
 
-            Tache tache = new Tache(titre, description, priorite, date, etat);
-            tache.setId(id);
-            taches.add(tache);
-        }
-
-        return taches;
+        return tache;
     }
 
     public void filtrerTaches(TacheDAO tacheDAO) {
@@ -189,5 +184,90 @@ public class ListeTache extends JFrame {
 
     public void setTacheControleur(TacheControleur tacheControleur) {
         this.tacheControleur = tacheControleur;
+    }
+
+    private class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else {
+                setForeground(table.getForeground());
+                setBackground(UIManager.getColor("Button.background"));
+            }
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    private class ButtonCellEditor extends DefaultCellEditor {
+        private JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public ButtonCellEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            label = "";
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                    int selectedRow = tableTaches.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        System.out.println("Ligne sélectionnée : " + selectedRow);
+                        int modelRow = tableTaches.convertRowIndexToModel(selectedRow);
+                        System.out.println("Ligne du modèle : " + modelRow);
+                        Tache tache = getTacheFromRow(modelRow);
+                        if (label.equals("Modifier")) {
+                            System.out.println("Modification de la tâche : " + tache.getTitre());
+                            tacheControleur.modifierTache(tache.getId());
+                        } else if (label.equals("Supprimer")) {
+                            System.out.println("Suppression de la tâche : " + tache.getTitre());
+                            tacheControleur.supprimerTache(tache);
+                        }
+                        stopCellEditing(); // Appeler stopCellEditing pour terminer l'édition de la cellule
+                    } else {
+                        System.out.println("Aucune ligne sélectionnée");
+                    }
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(table.getBackground());
+            }
+            label = (value == null) ? "" : value.toString(); // Attribuer value à label
+            button.setText(label);
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            isPushed = false;
+            return button.getText();
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        @Override
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
     }
 }

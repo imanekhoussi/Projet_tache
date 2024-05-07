@@ -39,7 +39,11 @@ public class TacheDAO {
             statement.setDate(4, new java.sql.Date(tache.getDate().getTime()));
             statement.setString(5, tache.getEtat());
             statement.setInt(6, tache.getId());
-            statement.executeUpdate();
+
+            System.out.println("Requête SQL : " + statement); // Débogage
+
+            int rowsUpdated = statement.executeUpdate();
+            System.out.println("Nombre de lignes mises à jour : " + rowsUpdated); // Débogage
         } catch (SQLException ex) {
             System.err.println("Erreur lors de la modification de la tâche : " + ex.getMessage());
         }
@@ -77,5 +81,46 @@ public class TacheDAO {
             System.err.println("Erreur lors de la récupération des tâches : " + ex.getMessage());
         }
         return taches;
+    }
+    public Tache getTacheById(int id) {
+        Tache tache = null;
+        try (Connection conn = DriverManager.getConnection(_JDBC_URL_, _JDBC_USER_, _JDBC_PASSWORD_)) {
+            String sql = "SELECT * FROM listetache WHERE Id = ?";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                String titre = resultSet.getString("Titre");
+                String description = resultSet.getString("Description");
+                String priorite = resultSet.getString("Priorité");
+                Date date = resultSet.getDate("Date");
+                String etat = resultSet.getString("Etat");
+                tache = new Tache(titre, description, priorite, date, etat);
+                tache.setId(id);
+            }
+        } catch (SQLException ex) {
+            System.err.println("Erreur lors de la récupération de la tâche : " + ex.getMessage());
+        }
+        return tache;
+    }
+    // Dans la classe TacheDAO
+    public int getTacheId(String titre, String description, String priorite, Date date, String etat) {
+        int id = -1;
+        try (Connection conn = DriverManager.getConnection(_JDBC_URL_, _JDBC_USER_, _JDBC_PASSWORD_)) {
+            String sql = "SELECT Id FROM listetache WHERE Titre = ? AND Description = ? AND Priorité = ? AND Date = ? AND Etat = ?";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, titre);
+            statement.setString(2, description);
+            statement.setString(3, priorite);
+            statement.setDate(4, new java.sql.Date(date.getTime()));
+            statement.setString(5, etat);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                id = resultSet.getInt("Id");
+            }
+        } catch (SQLException ex) {
+            System.err.println("Erreur lors de la récupération de l'ID de la tâche : " + ex.getMessage());
+        }
+        return id;
     }
 }

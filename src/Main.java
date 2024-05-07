@@ -6,8 +6,9 @@ import View.ListeTache;
 
 public class Main {
     public static void main(String[] args) {
-        ListeTache listeTacheVue = new ListeTache();
+
         TacheDAO tacheDAO = new TacheDAO();
+        ListeTache listeTacheVue = new ListeTache(tacheDAO);
         TacheControleur tacheControleur = new TacheControleur(listeTacheVue, tacheDAO);
 
         listeTacheVue.setTacheControleur(tacheControleur); // Ajoutez cette ligne
