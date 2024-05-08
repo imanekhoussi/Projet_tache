@@ -35,11 +35,66 @@ public class ListeTache extends JFrame {
         setTitle("Liste des tâches");
         setPreferredSize(new Dimension(1200, 800));
 
+        // Création du titre de l'application
+        JLabel labelTitre = new JLabel("Gestion des tâches");
+        labelTitre.setFont(new Font("Arial", Font.BOLD, 36));
+        labelTitre.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Création du bouton de notification
+        boutonNotifications = new JButton("Notifications");
+        boutonNotifications.setFont(new Font("Arial", Font.PLAIN, 14));
+        boutonNotifications.setPreferredSize(new Dimension(120, 40));
+        boutonNotifications.setBackground(Color.decode("#C38EB4"));
+
+        // Création du panel pour le titre et le bouton de notification
+        JPanel panelTitre = new JPanel(new BorderLayout());
+        panelTitre.add(labelTitre, BorderLayout.CENTER);
+        panelTitre.add(boutonNotifications, BorderLayout.EAST);
+
+        // Création de l'image
+        ImageIcon originalIcon = new ImageIcon("C:/Users/HP/Desktop/géoinfo/S2/java/Projet_tache/Img/gestion-des-taches.png");
+        Image originalImage = originalIcon.getImage();
+        Image resizedImage = originalImage.getScaledInstance(-1, 200, Image.SCALE_SMOOTH);
+        ImageIcon resizedIcon = new ImageIcon(resizedImage);
+        JLabel labelImage = new JLabel(resizedIcon);
+        labelImage.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Configuration du panelHaut avec GridBagLayout
+        JPanel panelHaut = new JPanel(new GridBagLayout());
+        panelHaut.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        GridBagConstraints gbcTitre = new GridBagConstraints();
+        gbcTitre.gridx = 0;
+        gbcTitre.gridy = 0;
+        gbcTitre.fill = GridBagConstraints.HORIZONTAL;
+        gbcTitre.weightx = 1.0;
+        panelHaut.add(panelTitre, gbcTitre);
+
+        GridBagConstraints gbcImage = new GridBagConstraints();
+        gbcImage.gridx = 0;
+        gbcImage.gridy = 1;
+        gbcImage.insets = new Insets(10, 0, 0, 0);
+        panelHaut.add(labelImage, gbcImage);
+
         // Initialisation des composants graphiques
         champRecherche = new JTextField();
-        champRecherche.setPreferredSize(new Dimension(300, 40));
-        champRecherche.setFont(new Font("Arial", Font.PLAIN, 16));
+        champRecherche.setPreferredSize(new Dimension(200, 30));
+        champRecherche.setFont(new Font("Arial", Font.PLAIN, 14));
 
+        JPanel panelRecherche = new JPanel(new BorderLayout());
+        panelRecherche.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        panelRecherche.add(new JLabel(" 🔍  "), BorderLayout.WEST);
+        panelRecherche.add(champRecherche, BorderLayout.CENTER);
+
+        GridBagConstraints gbcRecherche = new GridBagConstraints();
+        gbcRecherche.gridx = 0;
+        gbcRecherche.gridy = 2;
+        gbcRecherche.insets = new Insets(10, 0, 0, 0);
+        panelHaut.add(panelRecherche, gbcRecherche);
+
+        add(panelHaut, BorderLayout.NORTH);
+
+        // Configuration de la table des tâches
         tableTaches = new JTable();
         tableTaches.setFont(new Font("Arial", Font.PLAIN, 16));
         tableTaches.setRowHeight(30);
@@ -49,27 +104,11 @@ public class ListeTache extends JFrame {
         tableTaches.setAutoCreateRowSorter(true);
         tableTaches.setDragEnabled(true);
         tableTaches.setDropMode(DropMode.INSERT_ROWS);
-        tableTaches.setTransferHandler(new TransferHandler() {
-            // Implémentation du glisser-déposer des lignes de la table
-            // ...
-        });
 
-        boutonCreer = new JButton("Créer");
-        boutonCreer.setFont(new Font("Arial", Font.PLAIN, 16));
-        boutonCreer.setPreferredSize(new Dimension(120, 40));
-        boutonCreer.setBackground(Color.decode("#C38EB4")); // Changement de la couleur du bouton "Ajouter"
-
-        boutonNotifications = new JButton("notification");
-        boutonNotifications.setFont(new Font("Arial", Font.PLAIN, 16));
-        boutonNotifications.setPreferredSize(new Dimension(150, 40));
-        boutonNotifications.setBackground(Color.decode("#C38EB4")); // Changement de la couleur du bouton "Notifications"
-
-        // Configuration de la table des tâches
         modeleTableTaches = new DefaultTableModel(
                 new Object[][]{},
                 new String[]{"Titre", "Description", "Priorité", "Date", "État", "Modifier", "Supprimer"}
         ) {
-            // Rendre les cellules "Modifier" et "Supprimer" cliquables
             @Override
             public boolean isCellEditable(int row, int column) {
                 return column == 5 || column == 6;
@@ -77,30 +116,31 @@ public class ListeTache extends JFrame {
         };
         tableTaches.setModel(modeleTableTaches);
 
-        // Configuration des boutons "Modifier" et "Supprimer" dans chaque ligne
         tableTaches.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
         tableTaches.getColumnModel().getColumn(5).setCellEditor(new ButtonCellEditor(new JCheckBox()));
         tableTaches.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
         tableTaches.getColumnModel().getColumn(6).setCellEditor(new ButtonCellEditor(new JCheckBox()));
 
-        // Configuration de la disposition des composants
-        setLayout(new BorderLayout());
+        // Centrage du tableau avec GridBagLayout
+        JPanel panelCentre = new JPanel(new GridBagLayout());
+        panelCentre.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        panelCentre.add(new JScrollPane(tableTaches), gbc);
+        add(panelCentre, BorderLayout.CENTER);
 
-        JPanel panelHaut = new JPanel(new BorderLayout());
-        panelHaut.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panelHaut.add(new JLabel("Recherche \uD83D\uDD0D\n: "), BorderLayout.WEST);
-        panelHaut.add(champRecherche, BorderLayout.CENTER);
-        panelHaut.add(boutonNotifications, BorderLayout.EAST); // Ajout du bouton "Notifications" à droite
-        add(panelHaut, BorderLayout.NORTH);
+        boutonCreer = new JButton("+");
+        boutonCreer.setFont(new Font("Arial", Font.PLAIN, 20));
+        boutonCreer.setPreferredSize(new Dimension(100, 40));
+        boutonCreer.setBackground(Color.decode("#C38EB4"));
 
-        JScrollPane scrollPane = new JScrollPane(tableTaches);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        add(scrollPane, BorderLayout.CENTER);
-
-        JPanel panelBas = new JPanel(new BorderLayout()); // Utilisation de BorderLayout
+        JPanel panelBas = new JPanel(new BorderLayout());
         panelBas.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panelBas.add(Box.createHorizontalGlue(), BorderLayout.CENTER); // Ajout d'un espace horizontal extensible
-        panelBas.add(boutonCreer, BorderLayout.EAST); // Alignement du bouton "Créer" à droite
+        panelBas.add(boutonCreer, BorderLayout.EAST);
         add(panelBas, BorderLayout.SOUTH);
 
         pack();
@@ -124,7 +164,7 @@ public class ListeTache extends JFrame {
                     tache.getDate(),
                     tache.getEtat(),
                     "Modifier",
-                    "Supprimer"
+                    "Supprimer "
             };
             modeleTableTaches.addRow(rowData);
         }
@@ -154,7 +194,6 @@ public class ListeTache extends JFrame {
         String etat = (String) modeleTableTaches.getValueAt(modelRow, 4);
         Tache tache = new Tache(titre, description, priorite, date, etat);
 
-        // Récupérer l'ID de la tâche depuis le DAO
         int id = tacheDAO.getTacheId(titre, description, priorite, (java.sql.Date) date, etat);
         tache.setId(id);
 
@@ -194,7 +233,7 @@ public class ListeTache extends JFrame {
                 setBackground(table.getSelectionBackground());
             } else {
                 setForeground(table.getForeground());
-                setBackground(Color.decode("#C38EB4")); // Changement de la couleur de fond des boutons "Modifier" et "Supprimer"
+                setBackground(Color.decode("#C38EB4"));
             }
             setText((value == null) ? "" : value.toString());
             return this;
@@ -227,7 +266,7 @@ public class ListeTache extends JFrame {
                             System.out.println("Suppression de la tâche : " + tache.getTitre());
                             tacheControleur.supprimerTache(tache);
                         }
-                        stopCellEditing(); // Appeler stopCellEditing pour terminer l'édition de la cellule
+                        stopCellEditing();
                     } else {
                         System.out.println("Aucune ligne sélectionnée");
                     }
@@ -244,7 +283,7 @@ public class ListeTache extends JFrame {
                 button.setForeground(table.getForeground());
                 button.setBackground(table.getBackground());
             }
-            label = (value == null) ? "" : value.toString(); // Attribuer value à label
+            label = (value == null) ? "" : value.toString();
             button.setText(label);
             isPushed = true;
             return button;
