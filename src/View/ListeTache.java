@@ -57,10 +57,12 @@ public class ListeTache extends JFrame {
         boutonCreer = new JButton("Créer");
         boutonCreer.setFont(new Font("Arial", Font.PLAIN, 16));
         boutonCreer.setPreferredSize(new Dimension(120, 40));
+        boutonCreer.setBackground(Color.decode("#C38EB4")); // Changement de la couleur du bouton "Ajouter"
 
-        boutonNotifications = new JButton("Notifications");
+        boutonNotifications = new JButton("notification");
         boutonNotifications.setFont(new Font("Arial", Font.PLAIN, 16));
         boutonNotifications.setPreferredSize(new Dimension(150, 40));
+        boutonNotifications.setBackground(Color.decode("#C38EB4")); // Changement de la couleur du bouton "Notifications"
 
         // Configuration de la table des tâches
         modeleTableTaches = new DefaultTableModel(
@@ -86,24 +88,19 @@ public class ListeTache extends JFrame {
 
         JPanel panelHaut = new JPanel(new BorderLayout());
         panelHaut.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panelHaut.add(new JLabel("Recherche : "), BorderLayout.WEST);
+        panelHaut.add(new JLabel("Recherche \uD83D\uDD0D\n: "), BorderLayout.WEST);
         panelHaut.add(champRecherche, BorderLayout.CENTER);
+        panelHaut.add(boutonNotifications, BorderLayout.EAST); // Ajout du bouton "Notifications" à droite
         add(panelHaut, BorderLayout.NORTH);
 
         JScrollPane scrollPane = new JScrollPane(tableTaches);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(scrollPane, BorderLayout.CENTER);
 
-        JPanel panelBas = new JPanel();
+        JPanel panelBas = new JPanel(new BorderLayout()); // Utilisation de BorderLayout
         panelBas.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panelBas.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 10, 0, 10);
-        panelBas.add(boutonCreer, gbc);
-        gbc.gridx++;
-        panelBas.add(boutonNotifications, gbc);
+        panelBas.add(Box.createHorizontalGlue(), BorderLayout.CENTER); // Ajout d'un espace horizontal extensible
+        panelBas.add(boutonCreer, BorderLayout.EAST); // Alignement du bouton "Créer" à droite
         add(panelBas, BorderLayout.SOUTH);
 
         pack();
@@ -197,7 +194,7 @@ public class ListeTache extends JFrame {
                 setBackground(table.getSelectionBackground());
             } else {
                 setForeground(table.getForeground());
-                setBackground(UIManager.getColor("Button.background"));
+                setBackground(Color.decode("#C38EB4")); // Changement de la couleur de fond des boutons "Modifier" et "Supprimer"
             }
             setText((value == null) ? "" : value.toString());
             return this;
