@@ -11,6 +11,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,12 +25,21 @@ public class ListeTache extends JFrame {
     private TacheControleur tacheControleur;
     private TacheDAO tacheDAO;
 
+    // Load icons
+    private ImageIcon editIcon ;
+    private ImageIcon deleteIcon ;
+    private ImageIcon notificationIcon ;
+
     public ListeTache(TacheDAO tacheDAO) {
         this.tacheDAO = tacheDAO;
         initComponents();
     }
 
     private void initComponents() {
+        // Load icons
+        editIcon = new ImageIcon("src/images/edit.png");
+        deleteIcon = new ImageIcon("src/images/delete.png");
+        notificationIcon = new ImageIcon("src/images/notification.png");
         // Configuration de la fenêtre
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Liste des tâches");
@@ -40,11 +50,12 @@ public class ListeTache extends JFrame {
         labelTitre.setFont(new Font("Arial", Font.BOLD, 36));
         labelTitre.setHorizontalAlignment(SwingConstants.CENTER);
 
+
         // Création du bouton de notification
-        boutonNotifications = new JButton("Notifications");
+        ImageIcon scaledNotificationIcon = new ImageIcon(notificationIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+        boutonNotifications = new JButton(scaledNotificationIcon);
         boutonNotifications.setFont(new Font("Arial", Font.PLAIN, 14));
-        boutonNotifications.setPreferredSize(new Dimension(120, 40));
-        boutonNotifications.setBackground(Color.decode("#C38EB4"));
+        boutonNotifications.setPreferredSize(new Dimension(40, 40));
 
         // Création du panel pour le titre et le bouton de notification
         JPanel panelTitre = new JPanel(new BorderLayout());
@@ -107,7 +118,7 @@ public class ListeTache extends JFrame {
 
         modeleTableTaches = new DefaultTableModel(
                 new Object[][]{},
-                new String[]{"Titre", "Description", "Priorité", "Date", "État", "Modifier", "Supprimer"}
+                new String[]{"Titre", "Description", "Priorité", "Date", "État", "", ""}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -225,6 +236,8 @@ public class ListeTache extends JFrame {
     private class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
+            setBorderPainted(false);
+            setContentAreaFilled(false);
         }
 
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -233,13 +246,22 @@ public class ListeTache extends JFrame {
                 setBackground(table.getSelectionBackground());
             } else {
                 setForeground(table.getForeground());
-                setBackground(Color.decode("#C38EB4"));
+                setBackground(UIManager.getColor("Table.background"));
             }
-            setText((value == null) ? "" : value.toString());
+
+            setIcon(null); // Reset the icon
+
+            if (column == 5) {
+                ImageIcon scaledEditIcon = new ImageIcon(editIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+                setIcon(scaledEditIcon);
+            } else if (column == 6) {
+                ImageIcon scaledDeleteIcon = new ImageIcon(deleteIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+                setIcon(scaledDeleteIcon);
+            }
+
             return this;
         }
     }
-
     private class ButtonCellEditor extends DefaultCellEditor {
         private JButton button;
         private String label;
