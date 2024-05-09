@@ -27,32 +27,41 @@ public class NotificationsVue extends JFrame {
     private void initComponents(List<Tache> taches) {
         setTitle("Notifications");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
+        setSize(1000, 600); // Augmenter la largeur de la fenêtre
 
         tableModel = new DefaultTableModel(new Object[]{"Statut", "Tâche", "Date"}, 0);
         populateTableData(taches);
 
-        tableNotifications = new JTable(tableModel);
+        tableNotifications = new JTable(tableModel) {
+            @Override
+            public Dimension getPreferredScrollableViewportSize() {
+                return new Dimension(900, 400); // Augmenter la largeur du tableau
+            }
+        };
         tableNotifications.setRowHeight(40);
         tableNotifications.setFont(new Font("Arial", Font.PLAIN, 14));
-        tableNotifications.setShowGrid(false);
+        tableNotifications.setShowGrid(true); // Afficher les bordures du tableau
+        tableNotifications.setGridColor(Color.LIGHT_GRAY); // Couleur des bordures
         tableNotifications.setIntercellSpacing(new Dimension(10, 10));
         tableNotifications.setDefaultRenderer(Object.class, new NotificationCellRenderer());
+        tableNotifications.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16)); // Augmenter la taille de la police de l'en-tête
+        tableNotifications.getTableHeader().setPreferredSize(new Dimension(tableNotifications.getWidth(), 40)); // Augmenter la hauteur de l'en-tête
 
         JScrollPane scrollPane = new JScrollPane(tableNotifications);
         scrollPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         buttonFiltrer = new JButton("Filtrer");
+        buttonFiltrer.setPreferredSize(new Dimension(100, 40)); // Augmenter la hauteur du bouton
+        buttonFiltrer.setFont(new Font("Arial", Font.PLAIN, 14)); // Diminuer la taille de la police du bouton
 
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         contentPane.add(scrollPane, BorderLayout.CENTER);
         contentPane.add(buttonFiltrer, BorderLayout.SOUTH);
+        buttonFiltrer.setBackground(Color.decode("#C38EB4"));
 
         setContentPane(contentPane);
     }
-
     private void initStyle() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

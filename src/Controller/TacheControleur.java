@@ -13,6 +13,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -42,8 +44,29 @@ public class TacheControleur implements ActionListener {
                 listeTacheVue.filtrerTaches(tacheDAO);
             }
         });
-    }
 
+        // Ajouter les écouteurs d'événements pour les boutons de tri
+        listeTacheVue.getBoutonTrierPriorite().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mettreAJourListeTaches(PRIORITE_COMPARATOR);
+            }
+        });
+
+        listeTacheVue.getBoutonTrierEtat().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mettreAJourListeTaches(ETAT_COMPARATOR);
+            }
+        });
+
+        listeTacheVue.getBoutonTrierDate().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mettreAJourListeTaches(DATE_COMPARATOR);
+            }
+        });
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == listeTacheVue.getBoutonCreer()) {
@@ -66,7 +89,7 @@ public class TacheControleur implements ActionListener {
 
                 Tache nouvelleTache = new Tache(titre, description, priorite, date, etat);
                 tacheDAO.insererTache(nouvelleTache);
-                mettreAJourListeTaches();
+                mettreAJourListeTaches(null);
                 tacheVue.dispose();
             }
         });
@@ -110,7 +133,7 @@ public class TacheControleur implements ActionListener {
                     System.out.println("Avant d'appeler modifierTache du DAO"); // Débogage
                     tacheDAO.modifierTache(tacheAModifier);
                     System.out.println("Après l'appel à modifierTache du DAO"); // Débogage
-                    mettreAJourListeTaches(); // Appel déplacé ici
+                    mettreAJourListeTaches(null); // Appel déplacé ici
                     tacheModifierVue.dispose();
                 }
             });
@@ -120,20 +143,38 @@ public class TacheControleur implements ActionListener {
     }
     public void supprimerTache(Tache tache) {
         System.out.println("Entrée dans supprimerTache"); // Débogage
-        int confirmationSuppression = JOptionPane.showConfirmDialog(listeTacheVue, "Êtes-vous sûr de vouloir supprimer cette tâche ?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
+
+        // Créer un tableau avec les options personnalisées
+        Object[] options = {"Oui", "Non"};
+
+        // Afficher la boîte de dialogue de confirmation avec les options personnalisées
+        int confirmationSuppression = JOptionPane.showOptionDialog(listeTacheVue,
+                "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[1]); // Option "Non" sélectionnée par défaut
+
+        // Vérifier la réponse de l'utilisateur
         if (confirmationSuppression == JOptionPane.YES_OPTION) {
             System.out.println("Suppression confirmée"); // Débogage
             System.out.println("Avant d'appeler supprimerTache du DAO"); // Débogage
             tacheDAO.supprimerTache(tache.getId());
             System.out.println("Après l'appel à supprimerTache du DAO"); // Débogage
-            mettreAJourListeTaches();
+            mettreAJourListeTaches(null);
         } else {
             System.out.println("Suppression annulée"); // Débogage
         }
     }
-
-    public void mettreAJourListeTaches() {
+    public void mettreAJourListeTaches(Comparator<Tache> comparator) {
         List<Tache> taches = tacheDAO.listerTaches();
+
+        if (comparator != null) {
+            Collections.sort(taches, comparator);
+        }
+
         listeTacheVue.afficherTaches(taches);
         listeTacheVue.getChampRecherche().setText(""); // Réinitialiser le champ de recherche
     }
@@ -147,4 +188,26 @@ public class TacheControleur implements ActionListener {
             JOptionPane.showMessageDialog(listeTacheVue, "Aucune notification à afficher.", "Notifications", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+    // Dans la classe TacheControleur
+    private static final Comparator<Tache> PRIORITE_COMPARATOR = new Comparator<Tache>() {
+        @Override
+        public int compare(Tache t1, Tache t2) {
+            return t1.getPriorite().compareTo(t2.getPriorite());
+        }
+    };
+
+    private static final Comparator<Tache> ETAT_COMPARATOR = new Comparator<Tache>() {
+        @Override
+        public int compare(Tache t1, Tache t2) {
+            return t1.getEtat().compareTo(t2.getEtat());
+        }
+    };
+
+    private static final Comparator<Tache> DATE_COMPARATOR = new Comparator<Tache>() {
+        @Override
+        public int compare(Tache t1, Tache t2) {
+            return t1.getDate().compareTo(t2.getDate());
+        }
+    };
+
 }

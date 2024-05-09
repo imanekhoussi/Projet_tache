@@ -23,6 +23,14 @@ public class Tache {
         this.date = date;
         this.etat = etat;
     }
+    public Tache(String titre, String description, String priorite, Date date, String etat, int id) {
+        this.titre = titre;
+        this.description = description;
+        this.priorite = priorite;
+        this.date = date;
+        this.etat = etat;
+        this.id = id;
+    }
 
     public int getId() {
         return id;

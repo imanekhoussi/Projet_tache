@@ -3,9 +3,9 @@ package View;
 import Model.Tache;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JDateChooser;
 import java.awt.*;
-import java.util.Date;
 
 public class TacheVue extends JFrame {
     private JTextField champTitre;
@@ -14,6 +14,9 @@ public class TacheVue extends JFrame {
     private JDateChooser datePicker;
     private JComboBox<String> comboBoxEtat;
     private JButton boutonEnregistrer;
+    private JButton boutonAnnuler;
+
+    private static final Dimension FENETRE_DIMENSION = new Dimension(900, 700); // Ajustez ces valeurs selon vos préférences
 
     public TacheVue() {
         initComponents();
@@ -22,25 +25,36 @@ public class TacheVue extends JFrame {
     private void initComponents() {
         // Initialisation des composants graphiques
         champTitre = new JTextField();
-        champTitre.setFont(new Font("Arial", Font.PLAIN, 16));
+        champTitre.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         champDescription = new JTextArea();
-        champDescription.setFont(new Font("Arial", Font.PLAIN, 16));
+        champDescription.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         champDescription.setLineWrap(true);
         champDescription.setWrapStyleWord(true);
+        champDescription.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        comboBoxPriorite = new JComboBox<>(new String[]{"Élevée", "Moyenne", "Faible"});
-        comboBoxPriorite.setFont(new Font("Arial", Font.PLAIN, 16));
+        String[] prioriteOptions = {"Élevée", "Moyenne", "Faible"};
+        comboBoxPriorite = new JComboBox<>(prioriteOptions);
+        comboBoxPriorite.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         datePicker = new JDateChooser();
-        datePicker.setFont(new Font("Arial", Font.PLAIN, 16));
+        datePicker.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
-        comboBoxEtat = new JComboBox<>(new String[]{"À faire", "En cours", "Terminée"});
-        comboBoxEtat.setFont(new Font("Arial", Font.PLAIN, 16));
+        String[] etatOptions = {"À faire", "En cours", "Terminée"};
+        comboBoxEtat = new JComboBox<>(etatOptions);
+        comboBoxEtat.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         boutonEnregistrer = new JButton("Enregistrer");
-        boutonEnregistrer.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonEnregistrer.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         boutonEnregistrer.setPreferredSize(new Dimension(120, 40));
+        boutonEnregistrer.setBackground(Color.decode("#C38EB4"));
+        boutonEnregistrer.setForeground(Color.BLACK);
+
+        boutonAnnuler = new JButton("Annuler");
+        boutonAnnuler.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        boutonAnnuler.setPreferredSize(new Dimension(120, 40));
+        boutonAnnuler.setBackground(Color.decode("#C38EB4"));
+        boutonAnnuler.setForeground(Color.BLACK);
 
         // Configuration de la disposition des composants
         setLayout(new GridBagLayout());
@@ -95,15 +109,21 @@ public class TacheVue extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         add(comboBoxEtat, gbc);
 
-        gbc.gridx = 1;
+        JPanel panelBoutons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBoutons.add(boutonEnregistrer);
+        panelBoutons.add(boutonAnnuler);
+
+        gbc.gridx = 0;
         gbc.gridy = 5;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.EAST;
-        add(boutonEnregistrer, gbc);
+        add(panelBoutons, gbc);
 
         // Configuration de la fenêtre
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setTitle("Créer une tâche");
-        pack();
+        setPreferredSize(FENETRE_DIMENSION); // Définir la taille préférée
+        pack(); // Dimensionner la fenêtre en fonction des composants et de la taille préférée
         setLocationRelativeTo(null);
     }
 
@@ -129,5 +149,9 @@ public class TacheVue extends JFrame {
 
     public JButton getBoutonEnregistrer() {
         return boutonEnregistrer;
+    }
+
+    public JButton getBoutonAnnuler() {
+        return boutonAnnuler;
     }
 }

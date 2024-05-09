@@ -26,9 +26,12 @@ public class ListeTache extends JFrame {
     private TacheDAO tacheDAO;
 
     // Load icons
-    private ImageIcon editIcon ;
-    private ImageIcon deleteIcon ;
-    private ImageIcon notificationIcon ;
+    private ImageIcon editIcon;
+    private ImageIcon deleteIcon;
+    private ImageIcon notificationIcon;
+    private JButton boutonTrierPriorite;
+    private JButton boutonTrierEtat;
+    private JButton boutonTrierDate;
 
     public ListeTache(TacheDAO tacheDAO) {
         this.tacheDAO = tacheDAO;
@@ -40,6 +43,7 @@ public class ListeTache extends JFrame {
         editIcon = new ImageIcon("src/images/edit.png");
         deleteIcon = new ImageIcon("src/images/delete.png");
         notificationIcon = new ImageIcon("src/images/notification.png");
+
         // Configuration de la fenêtre
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Liste des tâches");
@@ -49,7 +53,6 @@ public class ListeTache extends JFrame {
         JLabel labelTitre = new JLabel("Gestion des tâches");
         labelTitre.setFont(new Font("Arial", Font.BOLD, 36));
         labelTitre.setHorizontalAlignment(SwingConstants.CENTER);
-
 
         // Création du bouton de notification
         ImageIcon scaledNotificationIcon = new ImageIcon(notificationIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
@@ -148,12 +151,37 @@ public class ListeTache extends JFrame {
         boutonCreer.setFont(new Font("Arial", Font.PLAIN, 20));
         boutonCreer.setPreferredSize(new Dimension(100, 40));
         boutonCreer.setBackground(Color.decode("#C38EB4"));
-
+        // Configuration de la partie inférieure
         JPanel panelBas = new JPanel(new BorderLayout());
-        panelBas.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panelBas.add(boutonCreer, BorderLayout.EAST);
-        add(panelBas, BorderLayout.SOUTH);
 
+// Panel pour le bouton d'ajout à droite
+        JPanel panelBoutonAjouter = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+        panelBoutonAjouter.add(boutonCreer);
+        panelBas.add(panelBoutonAjouter, BorderLayout.EAST);
+
+// Panel pour les boutons de tri au centre
+        // Initialisation des boutons de tri
+        boutonTrierPriorite = new JButton("Trier par priorité");
+        boutonTrierEtat = new JButton("Trier par état");
+        boutonTrierDate = new JButton("Trier par date");
+
+        // Configuration des boutons de tri
+        boutonTrierPriorite.setPreferredSize(new Dimension(150, 40));
+        boutonTrierPriorite.setBackground(Color.decode("#C38EB4"));
+        boutonTrierEtat.setPreferredSize(new Dimension(150, 40));
+        boutonTrierEtat.setBackground(Color.decode("#C38EB4"));
+        boutonTrierDate.setPreferredSize(new Dimension(150, 40));
+        boutonTrierDate.setBackground(Color.decode("#C38EB4"));
+
+        // Création du panel pour les boutons de tri
+        JPanel panelBoutonsTri = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelBoutonsTri.add(boutonTrierPriorite);
+        panelBoutonsTri.add(boutonTrierEtat);
+        panelBoutonsTri.add(boutonTrierDate);
+        panelBas.add(panelBoutonsTri, BorderLayout.CENTER);
+
+// Ajout du panelBas à la fenêtre principale
+        add(panelBas, BorderLayout.SOUTH);
         pack();
         setLocationRelativeTo(null);
 
@@ -167,6 +195,7 @@ public class ListeTache extends JFrame {
 
     public void afficherTaches(List<Tache> taches) {
         modeleTableTaches.setRowCount(0);
+
         for (Tache tache : taches) {
             Object[] rowData = {
                     tache.getTitre(),
@@ -174,24 +203,20 @@ public class ListeTache extends JFrame {
                     tache.getPriorite(),
                     tache.getDate(),
                     tache.getEtat(),
+                    tache.getId(),
                     "Modifier",
-                    "Supprimer "
+                    "Supprimer"
             };
             modeleTableTaches.addRow(rowData);
         }
     }
 
-    public JTable getTableTaches() {
-        return tableTaches;
-    }
 
     public JButton getBoutonCreer() {
         return boutonCreer;
     }
 
-    public JButton getBoutonNotifications() {
-        return boutonNotifications;
-    }
+
 
     public JTextField getChampRecherche() {
         return champRecherche;
@@ -203,14 +228,10 @@ public class ListeTache extends JFrame {
         String priorite = (String) modeleTableTaches.getValueAt(modelRow, 2);
         Date date = (Date) modeleTableTaches.getValueAt(modelRow, 3);
         String etat = (String) modeleTableTaches.getValueAt(modelRow, 4);
-        Tache tache = new Tache(titre, description, priorite, date, etat);
-
-        int id = tacheDAO.getTacheId(titre, description, priorite, (java.sql.Date) date, etat);
-        tache.setId(id);
-
-        return tache;
+        Object idObj = modeleTableTaches.getValueAt(modelRow, 5);
+        int id = idObj instanceof Integer ? (int) idObj : -1;
+        return new Tache(titre, description, priorite, date, etat, id);
     }
-
     public void filtrerTaches(TacheDAO tacheDAO) {
         String recherche = champRecherche.getText().trim().toLowerCase();
         List<Tache> tachesFiltrees = new ArrayList<>();
@@ -262,6 +283,7 @@ public class ListeTache extends JFrame {
             return this;
         }
     }
+
     private class ButtonCellEditor extends DefaultCellEditor {
         private JButton button;
         private String label;
@@ -281,14 +303,19 @@ public class ListeTache extends JFrame {
                         int modelRow = tableTaches.convertRowIndexToModel(selectedRow);
                         System.out.println("Ligne du modèle : " + modelRow);
                         Tache tache = getTacheFromRow(modelRow);
+                        System.out.println("Tâche sélectionnée : " + tache);
+                        System.out.println("ID de la tâche : " + tache.getId());
+                        System.out.println("Label : " + label); // Débogage
                         if (label.equals("Modifier")) {
-                            System.out.println("Modification de la tâche : " + tache.getTitre());
-                            tacheControleur.modifierTache(tache.getId());
+                            if (tache.getId() != -1) { // Vérifie si l'ID est valide
+                                tacheControleur.modifierTache(tache.getId());
+                            } else {
+                                System.out.println("L'ID de la tâche est invalide.");
+                            }
                         } else if (label.equals("Supprimer")) {
                             System.out.println("Suppression de la tâche : " + tache.getTitre());
                             tacheControleur.supprimerTache(tache);
                         }
-                        stopCellEditing();
                     } else {
                         System.out.println("Aucune ligne sélectionnée");
                     }
@@ -327,5 +354,17 @@ public class ListeTache extends JFrame {
         protected void fireEditingStopped() {
             super.fireEditingStopped();
         }
+    }
+
+    public JButton getBoutonTrierPriorite() {
+        return boutonTrierPriorite;
+    }
+
+    public JButton getBoutonTrierEtat() {
+        return boutonTrierEtat;
+    }
+
+    public JButton getBoutonTrierDate() {
+        return boutonTrierDate;
     }
 }

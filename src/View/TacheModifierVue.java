@@ -3,9 +3,9 @@ package View;
 import Model.Tache;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JDateChooser;
 import java.awt.*;
-import java.util.Date;
 
 public class TacheModifierVue extends JFrame {
     private JTextField champTitre;
@@ -16,6 +16,8 @@ public class TacheModifierVue extends JFrame {
     private JButton boutonConfirmer;
     private JButton boutonAnnuler;
 
+    private static final Dimension FENETRE_DIMENSION = new Dimension(800, 600); // Ajustez ces valeurs selon vos préférences
+
     public TacheModifierVue(Tache tache) {
         initComponents(tache);
     }
@@ -23,34 +25,39 @@ public class TacheModifierVue extends JFrame {
     private void initComponents(Tache tache) {
         // Initialisation des composants graphiques
         champTitre = new JTextField(tache.getTitre());
-        champTitre.setFont(new Font("Arial", Font.PLAIN, 16));
+        champTitre.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         champDescription = new JTextArea(tache.getDescription());
-        champDescription.setFont(new Font("Arial", Font.PLAIN, 16));
+        champDescription.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         champDescription.setLineWrap(true);
         champDescription.setWrapStyleWord(true);
+        champDescription.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         String[] prioriteOptions = {"Élevée", "Moyenne", "Faible"};
         comboBoxPriorite = new JComboBox<>(prioriteOptions);
         comboBoxPriorite.setSelectedItem(tache.getPriorite());
-        comboBoxPriorite.setFont(new Font("Arial", Font.PLAIN, 16));
+        comboBoxPriorite.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         datePicker = new JDateChooser();
         datePicker.setDate(tache.getDate());
-        datePicker.setFont(new Font("Arial", Font.PLAIN, 16));
+        datePicker.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         String[] etatOptions = {"À faire", "En cours", "Terminée"};
         comboBoxEtat = new JComboBox<>(etatOptions);
         comboBoxEtat.setSelectedItem(tache.getEtat());
-        comboBoxEtat.setFont(new Font("Arial", Font.PLAIN, 16));
+        comboBoxEtat.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
         boutonConfirmer = new JButton("Confirmer");
-        boutonConfirmer.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonConfirmer.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         boutonConfirmer.setPreferredSize(new Dimension(120, 40));
+        boutonConfirmer.setBackground(Color.decode("#C38EB4"));
+        boutonConfirmer.setForeground(Color.BLACK);
 
         boutonAnnuler = new JButton("Annuler");
-        boutonAnnuler.setFont(new Font("Arial", Font.PLAIN, 16));
+        boutonAnnuler.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         boutonAnnuler.setPreferredSize(new Dimension(120, 40));
+        boutonAnnuler.setBackground(Color.decode("#C38EB4"));
+        boutonAnnuler.setForeground(Color.BLACK);
 
         // Configuration de la disposition des composants
         setLayout(new GridBagLayout());
@@ -118,7 +125,8 @@ public class TacheModifierVue extends JFrame {
         // Configuration de la fenêtre
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setTitle("Modifier tâche");
-        pack();
+        setPreferredSize(FENETRE_DIMENSION); // Définir la taille préférée
+        pack(); // Dimensionner la fenêtre en fonction des composants et de la taille préférée
         setLocationRelativeTo(null);
     }
 
